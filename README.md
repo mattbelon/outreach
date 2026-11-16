@@ -6,6 +6,8 @@ The current user interface is in English.
 
 Spanish version: [README.es.md](README.es.md)
 
+Outreach-windows-x64-v1.0.0.zip contains the .exe file, ready to execute.
+
 ## Documentation
 
 - [Architecture](docs/architecture.md)
