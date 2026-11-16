@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -9,9 +10,10 @@ import '../../features/leads/presentation/leads_list/leads_list_cubit.dart';
 import '../../features/leads/presentation/leads_list/leads_page.dart';
 
 class AppRouter {
-  AppRouter(this._repository);
+  AppRouter(this._repository, this._setLocale);
 
   final LeadsRepository _repository;
+  final Future<void> Function(Locale locale) _setLocale;
 
   late final GoRouter router = GoRouter(
     initialLocation: '/leads',
@@ -20,7 +22,7 @@ class AppRouter {
         path: '/leads',
         builder: (context, state) => BlocProvider(
           create: (_) => LeadsListCubit(_repository)..initialize(),
-          child: const LeadsPage(),
+          child: LeadsPage(onLocaleSelected: _setLocale),
         ),
         routes: [
           GoRoute(

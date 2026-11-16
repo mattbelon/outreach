@@ -12,7 +12,9 @@ import '../../domain/leads_repository.dart';
 import 'leads_list_cubit.dart';
 
 class LeadsPage extends StatelessWidget {
-  const LeadsPage({super.key});
+  const LeadsPage({required this.onLocaleSelected, super.key});
+
+  final Future<void> Function(Locale locale) onLocaleSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -36,8 +38,13 @@ class LeadsPage extends StatelessWidget {
               actions: [
                 Padding(
                   padding: const EdgeInsets.only(right: 12),
-                  child: isCompact
-                      ? PopupMenuButton<_ToolbarAction>(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _LanguageSelector(onLocaleSelected: onLocaleSelected),
+                      const SizedBox(width: 8),
+                      if (isCompact)
+                        PopupMenuButton<_ToolbarAction>(
                           tooltip: 'Actions',
                           onSelected: (action) => _handleToolbarAction(
                             context,
@@ -59,7 +66,8 @@ class LeadsPage extends StatelessWidget {
                             ),
                           ],
                         )
-                      : Row(
+                      else
+                        Row(
                           children: [
                             TextButton.icon(
                               onPressed: () =>
@@ -79,6 +87,8 @@ class LeadsPage extends StatelessWidget {
                             ),
                           ],
                         ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -95,6 +105,19 @@ class LeadsPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Text(
+                          'Pipeline overview',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Keep your next conversations moving.',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        const SizedBox(height: 16),
+                        _PipelineSummary(leads: state.leads),
+                        const SizedBox(height: 20),
                         TextField(
                           onChanged: context.read<LeadsListCubit>().setQuery,
                           decoration: const InputDecoration(
@@ -193,6 +216,88 @@ class LeadsPage extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _LanguageSelector extends StatelessWidget {
+  const _LanguageSelector({required this.onLocaleSelected});
+
+  final Future<void> Function(Locale locale) onLocaleSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final isSpanish = Localizations.localeOf(context).languageCode == 'es';
+    return PopupMenuButton<Locale>(
+      tooltip: 'Language',
+      onSelected: onLocaleSelected,
+      itemBuilder: (context) => const [
+        PopupMenuItem(value: Locale('en'), child: Text('English')),
+        PopupMenuItem(value: Locale('es'), child: Text('Español')),
+      ],
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.language_outlined),
+          const SizedBox(width: 4),
+          Text(isSpanish ? 'Español' : 'English'),
+        ],
+      ),
+    );
+  }
+}
+
+class _PipelineSummary extends StatelessWidget {
+  const _PipelineSummary({required this.leads});
+
+  final List<Lead> leads;
+
+  @override
+  Widget build(BuildContext context) {
+    int count(LeadStatus status) =>
+        leads.where((lead) => lead.status == status).length;
+
+    return Wrap(
+      spacing: 10,
+      runSpacing: 10,
+      children: [
+        _PipelineMetric(label: 'All leads', value: leads.length),
+        _PipelineMetric(label: 'To reach', value: count(LeadStatus.pending)),
+        _PipelineMetric(label: 'In progress', value: count(LeadStatus.sent)),
+        _PipelineMetric(label: 'Replied', value: count(LeadStatus.replied)),
+      ],
+    );
+  }
+}
+
+class _PipelineMetric extends StatelessWidget {
+  const _PipelineMetric({required this.label, required this.value});
+
+  final String label;
+  final int value;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 142,
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: Theme.of(context).textTheme.labelMedium),
+              const SizedBox(height: 4),
+              Text(
+                '$value',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

@@ -66,3 +66,11 @@ As an outreach operator, I can export leads and import a validated CSV file so t
 - Data remains available without a network connection.
 - Existing local databases must remain usable after schema changes.
 - Every behavioral change must be covered by focused automated tests.
+
+## Language preference
+
+Users can choose English or Spanish from the lead-list app bar. The selector appears before the CSV export action, and the chosen language is restored when the application starts again.
+
+## Presentation quality
+
+The lead workspace presents a restrained B2B interface: a clear primary action, a concise pipeline summary derived from local data, readable filters, and responsive list/table layouts. Visual refinements must not change lead data, filtering, CSV behavior, or accessibility labels.

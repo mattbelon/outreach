@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../core/database/app_database.dart';
 import '../features/leads/domain/leads_repository.dart';
+import 'localization/locale_controller.dart';
 import 'router/app_router.dart';
 import 'theme/app_theme.dart';
 
@@ -22,12 +23,14 @@ class OutreachApp extends StatefulWidget {
 }
 
 class _OutreachAppState extends State<OutreachApp> {
+  final _localeController = LocaleController();
   late final AppRouter _appRouter;
 
   @override
   void initState() {
     super.initState();
-    _appRouter = AppRouter(widget.leadsRepository);
+    _appRouter = AppRouter(widget.leadsRepository, _localeController.setLocale);
+    _localeController.load();
   }
 
   @override
@@ -38,15 +41,19 @@ class _OutreachAppState extends State<OutreachApp> {
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider<LeadsRepository>.value(
-      value: widget.leadsRepository,
-      child: MaterialApp.router(
-        title: 'Outreach',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.light(),
-        localizationsDelegates: GlobalMaterialLocalizations.delegates,
-        supportedLocales: const [Locale('en')],
-        routerConfig: _appRouter.router,
+    return AnimatedBuilder(
+      animation: _localeController,
+      builder: (context, child) => RepositoryProvider<LeadsRepository>.value(
+        value: widget.leadsRepository,
+        child: MaterialApp.router(
+          title: 'Outreach',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light(),
+          locale: _localeController.locale,
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          supportedLocales: const [Locale('en'), Locale('es')],
+          routerConfig: _appRouter.router,
+        ),
       ),
     );
   }
